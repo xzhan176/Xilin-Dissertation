@@ -1,0 +1,7 @@
+This folder codes are used to analyze the NE actions.
+
+)Testing on various networks(Random Network Test-11_15_2022.ipyb), it shows that Max likes to go with low centrality,
+Min likes to go with extreme opinion.
+)Create_random_network.ipyb - used to create random network for expriment
+)Worth to mention that all random network created here has only one community, 
+same rule might not apply to two or more community network.

@@ -336,7 +336,7 @@ class Game:
     # TODO optimize this loop
     def _max_k_play(self, payoff_matrix, fla_min_fre):
         _, max_k_opinion_size = max_k_opinion_generator(self.k)
-        all_por = np.zeros(self.h)
+        all_por = np.zeros(self.h, float)
 
         if self.zero_sum:
             nodes = (x for x in range(self.n))
@@ -720,17 +720,17 @@ class Game:
             fla_min_fre = np.array(list(min_history_counter.values()))/(i+1)
             # print(f'fla_min_fre {fla_min_fre.shape}: {fla_min_fre}')
 
-            equi_max = round(equi_max, PRECISION)
-            equi_min = round(equi_min, PRECISION)
+            equi_max = round(float(equi_max), PRECISION)
+            equi_min = round(float(equi_min), PRECISION)
             if equi_max == equi_min:
                 print(
-                    f"Reached Nash Equilibrium at round {i} and Equi_Por = {equi_min}")
+                    f"Reached Nash Equilibrium at round {i} and Equi_Por = {equi_min:.{PRECISION}f}")
                 # print(f'max_distribution {max_frequency}')
                 # print(f'min_distribution {fla_min_fre}')
                 break
             else:
                 print(
-                    f"Not Reached Nash Equilibrium at Equi_Min = {equi_min} and Equi_Max = {equi_max}")
+                    f"Not Reached Nash Equilibrium at Equi_Min = {equi_min:.{PRECISION}f} and Equi_Max = {equi_max:.{PRECISION}f}")
 
         # Game has finished
         print('-' * 20)

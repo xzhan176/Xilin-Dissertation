@@ -44,13 +44,15 @@ def run(network_name: str,
     print(f'Number of cores available: {cpu_count()}.')
     print('\n.\n.\n.')
 
+    temp_directory = 'temp/memmaps'
+
     # Run the game
     game = Game(k, polarization_fn, s, A,
                 disk_dumped=disk_dumped,
                 zero_sum=zero_sum,
                 temp_path=os.path.join(
                     os.path.dirname(__file__),
-                    "memmaps",
+                    temp_directory,
                     f"memmaps_{network_name}_{k}_{experiment}"))
     result = game.run(game_rounds, memory)
 

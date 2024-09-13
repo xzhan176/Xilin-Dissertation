@@ -5,9 +5,9 @@ from game import Game
 from utils import *
 
 
-def generateScriptContent(network, k, experiment, game_rounds, memory, zero_sum, cpu_count=1):
-    job_name = f"{network[:2]}k{k}e{experiment}"
-    result_name = f"{network}-k-{k}-e-{experiment}-m-{memory}"
+def generateScriptContent(network_name, polarization_fn_name, k, experiment, game_rounds, memory, zero_sum, cpu_count=1):
+    job_name = f"{network_name[:2]}k{k}e{experiment}"
+    result_name = f"{network_name}-k-{k}-e-{experiment}-m-{memory}"
     zero_sum_argument = "--zero-sum" if zero_sum else ""
     script = f"""#!/bin/bash
 #SBATCH --job-name={job_name}
@@ -17,7 +17,7 @@ def generateScriptContent(network, k, experiment, game_rounds, memory, zero_sum,
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={cpu_count}
 
-python run.py {network} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}
+python run.py {network_name} {polarization_fn_name} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}
 """
     return script
 
@@ -27,7 +27,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Submit a batch of experiments with number of nodes range from 1 to k")
     parser.add_argument("network",
-                        help="The network to run the experiment on")
+                        help="The network to run the experiment on",
+                        type=str)
+    parser.add_argument("polarization_fn",
+                        help="The polarization function to use",
+                        type=str)
     parser.add_argument("k",
                         help="The number of nodes to select. The script will run experiments for each k=1,2,3,...,k.",
                         type=int)
@@ -60,8 +64,11 @@ def main():
     memory = args.memory
     maxK = args.k
 
+    polarization_fn_name = args.polarization_fn
+
     # Preload network data to disk
-    network_module = import_network(args.network)
+    network_name = args.network
+    network_module = import_network(network_name)
     G, s, n = network_module.init()
     L = scipy.sparse.csgraph.laplacian(G, normed=False)
     A = np.linalg.inv(np.identity(n) + L)
@@ -80,12 +87,13 @@ def main():
             print(f'Experiment {experiment} k={k}', flush=True)
 
             if args.no_slurm:
-                python_script = f"python run.py {args.network} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}"
+                python_script = f"python run.py {network_name} {polarization_fn_name} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}"
                 os.system(python_script)
             else:
                 f = open(temp_script, "w")
-                f.write(generateScriptContent(args.network,
-                        k, experiment, game_rounds, memory,
+                f.write(generateScriptContent(network_name,
+                        polarization_fn_name, k, experiment,
+                        game_rounds, memory,
                         zero_sum=args.zero_sum,
                         cpu_count=args.cpus_per_task))
                 f.close()

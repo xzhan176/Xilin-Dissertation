@@ -43,7 +43,7 @@ class Game:
     """
 
     @staticmethod
-    def loadDataToDisk(data, filename: str, folder: str = 'memmaps'):
+    def loadDataToDisk(data, filename: str, folder: str = 'temp/memmaps'):
         """
         Use this static method to load s and A to disk for improved performance
         """

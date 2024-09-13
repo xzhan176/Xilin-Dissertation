@@ -62,7 +62,7 @@ def main():
                         type=int,
                         default=10)
     parser.add_argument("-dd", "--disk-dumped",
-                        help="Use disk dumped data",
+                        help="Use disk dumped data. Default is False. If True, the script will skip the network initialization and use the data from disk. Data should be dumped using the Game.loadDataToDisk method prior to running the script.",
                         action="store_true")
     parser.add_argument("-z", "--zero-sum",
                         help="Whether the game is zero-sum",

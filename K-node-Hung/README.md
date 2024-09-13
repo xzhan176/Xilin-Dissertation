@@ -28,6 +28,15 @@ You can customize the `run.py` script parameters to run the simulation with diff
 python run.py --help
 ```
 
+Example
+
+```bash
+# Run the simulation on the karate network with k=2 and experiment index 0
+python run.py karate 2 0
+# Run the simulation on the karate network with k=3, experiment index 0, 100 rounds, 5 memory, and zero-sum game
+python run.py karate 3 0 -r 100 -m 5 --zero-sum
+```
+
 ## Run the simulation in batch
 
 ```bash
@@ -38,6 +47,15 @@ You can customize the `run_batch.py` script parameters to run the simulation wit
 
 ```bash
 python run_batch.py --help
+```
+
+Example
+
+```bash
+# Run the simulation on the karate network with k=2
+python run.py karate 2
+# Run the simulation on the karate network with k=3, 5 experiments each k, 100 rounds, 5 memory, 10 core cpus, and zero-sum game
+python run.py karate 3 -e 5 -r 100 -m 5 -c 10 --zero-sum
 ```
 
 ## Results

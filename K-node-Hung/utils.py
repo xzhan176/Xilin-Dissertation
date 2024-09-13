@@ -45,14 +45,6 @@ def get_node_edges(G, n):
 
     return edges
 
-def obj_polarization(A, op, n) -> float:
-    """
-    Maximizing polarization only: \\bar{z}^T \\bar{z}
-    """
-    op_mean = mean_center(op, n)
-    z_mean = np.dot(A, op_mean)
-    return np.dot(np.transpose(z_mean), z_mean)[0, 0]
-
 
 def obj_innate_polarization(s, n):
     """
@@ -95,6 +87,13 @@ def calculate_polarization(s, n, A, L):
 
     di = equ_pol - innat_pol
     print(f"Difference:\t\t{di}")
+
+
+def import_polarization_fn(name: str):
+    """
+    return the function from the polarization_fns module
+    """
+    return importlib.import_module(f'polarization_functions.{name}').fn
 
 
 def import_network(name: str):
@@ -157,6 +156,7 @@ def network_anl(s, n, G, agent):
 
     print(f"Agent's opinion extremity is ranked as:\t{res4}")
     print(f"Agent's min_pref is ranked as:\t{res4+res1}")
+
 
 def fn_benchmark(fn, label='', display=True):
     start = time.perf_counter()

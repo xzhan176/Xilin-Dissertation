@@ -6,13 +6,28 @@ from game import Game, exportGameResult
 from utils import *
 
 
-def run(network: str, k: int, experiment: int, memory: int,
+def run(network_name: str,
+        k: int,
+        polarization_fn_name: str,
+        experiment: int,
+        memory: int,
         game_rounds: int | None = None,
         disk_dumped: bool = False,
         zero_sum: bool = False):
+
+    network_module = import_network(network_name)
+    if network_module is None:
+        print(f"Could not import network named {network_name}.")
+        return
+
+    polarization_fn = import_polarization_fn(polarization_fn_name)
+    if polarization_fn is None:
+        print(
+            f"Could not import polarization function named {polarization_fn_name}.")
+        return
+
     # Prepare network
     if not disk_dumped:
-        network_module = import_network(network)
         G, s, n = network_module.init()
         L = scipy.sparse.csgraph.laplacian(G, normed=False)
         A = np.linalg.inv(np.identity(n) + L)
@@ -25,29 +40,33 @@ def run(network: str, k: int, experiment: int, memory: int,
 
     print('-' * 40)
     print(
-        f"Running experiment {experiment} for network \"{network}\" (n = {n}) with game_rounds={game_rounds} k={k} memory={memory}.")
+        f"Running experiment {experiment} for network \"{network_name}\" (n = {n}) with game_rounds={game_rounds} k={k} memory={memory}.")
     print(f'Number of cores available: {cpu_count()}.')
     print('\n.\n.\n.')
 
     # Run the game
-    game = Game(k, s, A,
+    game = Game(k, polarization_fn, s, A,
                 disk_dumped=disk_dumped,
                 zero_sum=zero_sum,
                 temp_path=os.path.join(
                     os.path.dirname(__file__),
                     "memmaps",
-                    f"memmaps_{network}_{k}_{experiment}"))
+                    f"memmaps_{network_name}_{k}_{experiment}"))
     result = game.run(game_rounds, memory)
 
     # Save the result
-    exportGameResult(network, game, result, k, memory, experiment)
+    exportGameResult(network_name, game, result, k, memory, experiment)
 
 
 def main():
     # Get command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("network",
-                        help="The network to run the experiment on")
+                        help="The network to run the experiment on",
+                        type=str)
+    parser.add_argument("polarization_fn",
+                        help="The polarization function to use",
+                        type=str)
     parser.add_argument("k",
                         help="The number of nodes to select",
                         type=int)
@@ -73,6 +92,7 @@ def main():
     fn_benchmark(lambda: run(
         args.network,
         args.k,
+        args.polarization_fn,
         args.experiment,
         args.memory,
         game_rounds=args.rounds,

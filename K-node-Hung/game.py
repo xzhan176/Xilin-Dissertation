@@ -58,7 +58,8 @@ class Game:
         data_memmap = os.path.join(folderPath, filename)
         dump(data, data_memmap)
 
-    def __init__(self, k: int, s=None, A=None,
+    def __init__(self, k: int, polarization_fn,
+                 s=None, A=None,
                  temp_path: str | None = None,
                  s_memmap_file: str | None = None,
                  A_memmap_file: str | None = None,
@@ -94,6 +95,7 @@ class Game:
         self.A = load(A_memmap_file, mmap_mode='r')
 
         self.k = k
+        self.polarization_fn = polarization_fn
         self.h = len_actions(k, self.n)
         self.zero_sum = zero_sum
         self.max_touched = []
@@ -210,7 +212,7 @@ class Game:
                     op_min_max = change_k_innate_opinion(
                         op, k_node, k_opinion)
 
-                payoff_polarization = obj_polarization(
+                payoff_polarization = self.polarization_fn(
                     self.A, op_min_max, self.n)
                 payoffs[column] = payoff_polarization
 
@@ -279,7 +281,7 @@ class Game:
         # print('Nodes, opinions')
         # print(v_list, new_op)
         op = change_k_innate_opinion(self.s, v_list, new_op)
-        por = obj_polarization(self.A, op, self.n)
+        por = self.polarization_fn(self.A, op, self.n)
         column = len_kops*i_th + op_index
         return (v_list, new_op, por, column)
 
@@ -305,7 +307,7 @@ class Game:
         # print('Nodes, opinions')
         # print(v_list, new_op_list)
         updated_op = change_k_innate_opinion(self.s, v_list, new_op_list)
-        por = obj_polarization(self.A, updated_op, self.n)
+        por = self.polarization_fn(self.A, updated_op, self.n)
         return (v_list, new_op_list, por)
 
     def _mixed_k_min_polarization(self, v2, k_opinion, fla_max_fre):

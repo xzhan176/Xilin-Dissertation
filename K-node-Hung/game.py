@@ -276,13 +276,17 @@ class Game:
         Player randomly choose an agent and randomly change the agent.
         Will not choose the agent that has been touched by the maximizer.
         '''
-        available_nodes = (x for x in range(self.n) if x not in touched)
+        if self.zero_sum:
+            available_nodes = (x for x in range(self.n))
+            unique_touched_count = 0
+        else:
+            available_nodes = (x for x in range(self.n) if x not in touched)
+            unique_touched_count = len(set(touched))
         available_combinations = combinations(available_nodes, self.k_min)
 
-        # number of unique touched nodes
-        a = len(set(touched))
+
         # number of available combination of k nodes
-        len_nodesets = comb(self.n-a, self.k_min)
+        len_nodesets = comb(self.n-unique_touched_count, self.k_min)
         random_k_node_index = random.randint(0, len_nodesets-1)
 
         k_nodes = next(islice(available_combinations, random_k_node_index, None))
@@ -395,44 +399,44 @@ class Game:
 
         return v1, max_opinion, max_por, column
 
-    # with multiprocessing
-    def _max_k_play_multi2(self, payoff_matrix, fla_min_fre):
-        _, max_k_opinion_size = max_k_opinion_generator(self.k_max)
-        all_por = np.zeros(self.h)
+    # # with multiprocessing
+    # def _max_k_play_multi2(self, payoff_matrix, fla_min_fre):
+    #     _, max_k_opinion_size = max_k_opinion_generator(self.k_max)
+    #     all_por = np.zeros(self.h)
 
-        if self.zero_sum:
-            nodes = (x for x in range(self.n))
-        else:
-            nodes = (x for x in range(self.n) if x not in self.min_touched)
-        v1_gen = combinations(nodes, self.k_max)
+    #     if self.zero_sum:
+    #         nodes = (x for x in range(self.n))
+    #     else:
+    #         nodes = (x for x in range(self.n) if x not in self.min_touched)
+    #     v1_gen = combinations(nodes, self.k_max)
 
-        def calculate_polarization(v1, payoff_matrix, fla_min_fre):
-            v1_index = find_index(self.n, v1)
+    #     def calculate_polarization(v1, payoff_matrix, fla_min_fre):
+    #         v1_index = find_index(self.n, v1)
 
-            for i in range(max_k_opinion_size):  # for each opinion combination
-                # locate the column in payoff row - all combinations
-                column = v1_index * max_k_opinion_size + i
-                mixed_polarization = self._k_max_polarization(
-                    payoff_matrix, column, fla_min_fre)
-                all_por[column] = mixed_polarization
+    #         for i in range(max_k_opinion_size):  # for each opinion combination
+    #             # locate the column in payoff row - all combinations
+    #             column = v1_index * max_k_opinion_size + i
+    #             mixed_polarization = self._k_max_polarization(
+    #                 payoff_matrix, column, fla_min_fre)
+    #             all_por[column] = mixed_polarization
 
-        cpu_count = os.cpu_count()
-        Parallel(n_jobs=cpu_count)(
-            delayed(calculate_polarization)
-            (v1, payoff_matrix, fla_min_fre)
-            for v1 in v1_gen)
+    #     cpu_count = os.cpu_count()
+    #     Parallel(n_jobs=cpu_count)(
+    #         delayed(calculate_polarization)
+    #         (v1, payoff_matrix, fla_min_fre)
+    #         for v1 in v1_gen)
 
-        # Index of maximum polarization - in all actions
-        column = np.argmax(all_por)
-        max_pol = all_por[column]
-        # print(f'Max play best action column: {column}')
+    #     # Index of maximum polarization - in all actions
+    #     column = np.argmax(all_por)
+    #     max_pol = all_por[column]
+    #     # print(f'Max play best action column: {column}')
 
-        v1, v1_opinion = self.map_action(column)
+    #     v1, v1_opinion = self.map_action(column)
 
-        print(
-            f"Maximizer found its target {self.k_max} agents: {v1} op: {v1_opinion}")
+    #     print(
+    #         f"Maximizer found its target {self.k_max} agents: {v1} op: {v1_opinion}")
 
-        return v1, v1_opinion, max_pol, column
+    #     return v1, v1_opinion, max_pol, column
 
     def _mixed_choose_min_vertex_multi(self, fla_max_fre):
         '''
@@ -663,7 +667,6 @@ class Game:
             (v1, max_opinion, equi_max, column) = fn_benchmark(
                 lambda: self._max_k_play(
                     # lambda: self._max_k_play_multi(
-                    # lambda: self._max_k_play_multi2(
                     payoff_matrix, fla_min_fre),
                 label="Maximizer play",
                 display=DISPLAY_BENCHMARK,

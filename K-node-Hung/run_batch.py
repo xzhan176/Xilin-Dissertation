@@ -7,7 +7,7 @@ from utils import *
 
 def generateScriptContent(network_name, polarization_fn_name, k, experiment, game_rounds, memory, zero_sum, cpu_count=1):
     job_name = f"{network_name[:2]}k{k}e{experiment}"
-    result_name = f"{network_name}-k-{k}-e-{experiment}-m-{memory}"
+    result_name = f"{network_name}-k-{k}-{k}-e-{experiment}-m-{memory}"
     zero_sum_argument = "--zero-sum" if zero_sum else ""
     script = f"""#!/bin/bash
 #SBATCH --job-name={job_name}
@@ -17,7 +17,7 @@ def generateScriptContent(network_name, polarization_fn_name, k, experiment, gam
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={cpu_count}
 
-python run.py {network_name} {polarization_fn_name} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}
+python run.py {network_name} {polarization_fn_name} {k} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}
 """
     return script
 
@@ -84,10 +84,10 @@ def main():
 
         for experiment in range(1, args.experiments + 1):
             print('-' * 20, flush=True)
-            print(f'Experiment {experiment} k={k}', flush=True)
+            print(f'Experiment {experiment} k_max=k_min={k}', flush=True)
 
             if args.no_slurm:
-                python_script = f"python run.py {network_name} {polarization_fn_name} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}"
+                python_script = f"python run.py {network_name} {polarization_fn_name} {k} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}"
                 os.system(python_script)
             else:
                 f = open(temp_script, "w")

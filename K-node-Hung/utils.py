@@ -75,15 +75,33 @@ def plot_centrality_histogram(ax, df, title, bins, ylim):
     ax.tick_params(axis='y', labelsize=16)
 
 
-def import_polarization_fn(name: str):
-    """
-    return the function from the polarization_fns module
-    """
-    return importlib.import_module(f'polarization_functions.{name}').fn
+def calculate_polarization(s, n, A, L, polarization_fn):
+    y = mean_center(s, n)
+    # Polarization before opinion dynamics
+    innat_pol = np.dot(np.transpose(y), y)[0, 0]
+    print(f'Innate_polarization:\t{innat_pol}')
+
+    # Polarization after opinion dynamics
+    equ_pol = polarization_fn(A, s, n)
+    print(f'Equi_polarization:\t{equ_pol}')
+
+    di = equ_pol - innat_pol
+    print(f"Difference:\t\t{di}")
 
 
-def import_network(name: str):
-    return importlib.import_module(f'networks.{name}')
+def import_polarization_fn(fn_name: str):
+    """
+    fn_name: must match the name of a file in the polarization_functions directory
+    return the function from the polarization_functions module
+    """
+    return importlib.import_module(f'polarization_functions.{fn_name}').fn
+
+
+def import_network(network_name: str):
+    """
+    network_name: must match the name of a file in the networks directory
+    """
+    return importlib.import_module(f'networks.{network_name}')
 
 
 def network_anl(s, n, G, agent):

@@ -65,32 +65,32 @@ def main():
     # Get command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("network",
-                        help="The network to run the experiment on",
+                        help="The network to run the experiment on.",
                         type=str)
     parser.add_argument("polarization_fn",
-                        help="The polarization function to use",
+                        help="The polarization function to use.",
                         type=str)
     parser.add_argument("k_max",
-                        help="The number of nodes to select for max play",
+                        help="The number of nodes to select for max play.",
                         type=int)
     parser.add_argument("k_min",
-                        help="The number of nodes to select for min play",
+                        help="The number of nodes to select for min play.",
                         type=int)
     parser.add_argument("experiment",
-                        help="The experiment number to run",
+                        help="The experiment number to run.",
                         type=int)
     parser.add_argument("-r", "--rounds",
-                        help="The number of rounds to run the game for. Default is k * 200",
+                        help="The number of rounds to run the game for. Default is max(k_max, k_min) * 200.",
                         type=int)
     parser.add_argument("-m", "--memory",
-                        help="The memory of the game. Default is 10",
+                        help="The memory of the game. Default is 10.",
                         type=int,
                         default=10)
     parser.add_argument("-dd", "--disk-dumped",
                         help="Use disk dumped data. Default is False. If True, the script will skip the network initialization and use the data from disk. Data should be dumped using the Game.loadDataToDisk method prior to running the script.",
                         action="store_true")
     parser.add_argument("-z", "--zero-sum",
-                        help="Whether the game is zero-sum",
+                        help="Pass this argument to make the game zero-sum. Default is non-zero-sum (when omitting this argument).",
                         action="store_true",
                         default=False)
     args = parser.parse_args()

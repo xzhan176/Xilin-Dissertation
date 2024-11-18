@@ -45,14 +45,6 @@ def get_node_edges(G, n):
 
     return edges
 
-def obj_polarization(A, op, n) -> float:
-    """
-    Maximizing polarization only: \\bar{z}^T \\bar{z}
-    """
-    op_mean = mean_center(op, n)
-    z_mean = np.dot(A, op_mean)
-    return np.dot(np.transpose(z_mean), z_mean)[0, 0]
-
 
 def obj_innate_polarization(s, n):
     """
@@ -83,22 +75,33 @@ def plot_centrality_histogram(ax, df, title, bins, ylim):
     ax.tick_params(axis='y', labelsize=16)
 
 
-def calculate_polarization(s, n, A, L):
+def calculate_polarization(s, n, A, L, polarization_fn):
     y = mean_center(s, n)
     # Polarization before opinion dynamics
     innat_pol = np.dot(np.transpose(y), y)[0, 0]
     print(f'Innate_polarization:\t{innat_pol}')
 
     # Polarization after opinion dynamics
-    equ_pol = obj_polarization(A, s, n)
+    equ_pol = polarization_fn(A, s, n)
     print(f'Equi_polarization:\t{equ_pol}')
 
     di = equ_pol - innat_pol
     print(f"Difference:\t\t{di}")
 
 
-def import_network(name: str):
-    return importlib.import_module(f'networks.{name}')
+def import_polarization_fn(fn_name: str):
+    """
+    fn_name: must match the name of a file in the polarization_functions directory
+    return the function from the polarization_functions module
+    """
+    return importlib.import_module(f'polarization_functions.{fn_name}').fn
+
+
+def import_network(network_name: str):
+    """
+    network_name: must match the name of a file in the networks directory
+    """
+    return importlib.import_module(f'networks.{network_name}')
 
 
 def network_anl(s, n, G, agent):
@@ -157,6 +160,7 @@ def network_anl(s, n, G, agent):
 
     print(f"Agent's opinion extremity is ranked as:\t{res4}")
     print(f"Agent's min_pref is ranked as:\t{res4+res1}")
+
 
 def fn_benchmark(fn, label='', display=True):
     start = time.perf_counter()
